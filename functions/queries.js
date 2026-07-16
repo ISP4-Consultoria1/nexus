@@ -74,4 +74,14 @@ export async function getTaskById(taskId) {
   return result[0] || null;
 }
 
+export async function updateTaskDatesAndStatus(taskId, startDate, endDate, status) {
+  return await sql`
+    UPDATE "task"
+    SET start_date = ${startDate}, end_date = ${endDate}, status = ${status}
+    WHERE id = ${taskId}
+    RETURNING id
+  `;
+}
+
+
 

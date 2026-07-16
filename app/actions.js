@@ -8,7 +8,8 @@ import {
   getAllTasksWithUser,
   createTask,
   deleteTask,
-  getTaskById
+  getTaskById,
+  updateTaskDatesAndStatus
 } from '../functions/queries.js';
 
 export async function loginAction(key) {
@@ -26,7 +27,12 @@ export async function fetchTasksAction(userId) {
   if (!userId) {
     throw new Error('userId não informado');
   }
-  return await getTasksByUserId(userId);
+  const tasks = await getTasksByUserId(userId);
+  const needsReload = await processRecurringTasks(tasks);
+  if (needsReload) {
+    return await getTasksByUserId(userId);
+  }
+  return tasks;
 }
 
 function calculateNextRecurrenceDates(startDateStr, endDateStr, recurrenceCode) {
@@ -73,36 +79,54 @@ function calculateNextRecurrenceDates(startDateStr, endDateStr, recurrenceCode) 
   };
 }
 
+async function processRecurringTasks(tasks) {
+  const today = new Date();
+  const todayYear = today.getFullYear();
+  const todayMonth = String(today.getMonth() + 1).padStart(2, '0');
+  const todayDay = String(today.getDate()).padStart(2, '0');
+  const todayStr = `${todayYear}-${todayMonth}-${todayDay}`;
+  
+  let needsReload = false;
+  for (const task of tasks) {
+    if (task.recurrence >= 1 && task.recurrence <= 6) {
+      let endStr = '';
+      if (typeof task.end_date === 'string') {
+        endStr = task.end_date.split('T')[0];
+      } else {
+        const end = new Date(task.end_date);
+        const endYear = end.getUTCFullYear();
+        const endMonth = String(end.getUTCMonth() + 1).padStart(2, '0');
+        const endDay = String(end.getUTCDate()).padStart(2, '0');
+        endStr = `${endYear}-${endMonth}-${endDay}`;
+      }
+      
+      if (todayStr > endStr) {
+        let currentStartDate = task.start_date;
+        let currentEndDate = task.end_date;
+        let tempEndStr = endStr;
+        
+        while (todayStr > tempEndStr) {
+          const next = calculateNextRecurrenceDates(currentStartDate, currentEndDate, task.recurrence);
+          currentStartDate = next.start_date;
+          currentEndDate = next.end_date;
+          tempEndStr = next.end_date;
+        }
+        
+        await updateTaskDatesAndStatus(task.id, currentStartDate, currentEndDate, 0);
+        needsReload = true;
+      }
+    }
+  }
+  return needsReload;
+}
+
 export async function updateTaskStatusAction(taskId, status) {
   if (taskId === undefined || status === undefined) {
     throw new Error('Parâmetros inválidos');
   }
-
-  // 1. Obter tarefa atual para verificar recorrência
-  const task = await getTaskById(taskId);
-  if (!task) {
-    throw new Error('Tarefa não encontrada');
-  }
-
-  // 2. Se for marcada como concluída (status 1 ou 5) e tiver recorrência (1 a 6)
-  if ((status === 1 || status === 5) && task.recurrence >= 1 && task.recurrence <= 6) {
-    const { start_date, end_date } = calculateNextRecurrenceDates(task.start_date, task.end_date, task.recurrence);
-    
-    // Clonar e gerar a nova ocorrência pendente (status 0)
-    await createTask({
-      title: task.title,
-      description: task.description,
-      start_date,
-      end_date,
-      recurrence: task.recurrence,
-      id_user: task.id_user
-    });
-  }
-
-  // 3. Atualizar o status do registro atual
   const updated = await updateTaskStatus(taskId, status);
   if (!updated) {
-    throw new Error('Erro ao atualizar status da tarefa');
+    throw new Error('Tarefa não encontrada');
   }
   return updated;
 }
@@ -112,7 +136,12 @@ export async function fetchUsersAction() {
 }
 
 export async function fetchAllTasksWithUserAction() {
-  return await getAllTasksWithUser();
+  const tasks = await getAllTasksWithUser();
+  const needsReload = await processRecurringTasks(tasks);
+  if (needsReload) {
+    return await getAllTasksWithUser();
+  }
+  return tasks;
 }
 
 export async function createTaskAction(taskData) {
