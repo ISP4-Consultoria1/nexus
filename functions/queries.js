@@ -28,3 +28,39 @@ export async function updateTaskStatus(taskId, status) {
   `;
   return result[0] || null;
 }
+
+export async function getAllUsers() {
+  return await sql`
+    SELECT id, name, key, access 
+    FROM "user" 
+    ORDER BY name ASC
+  `;
+}
+
+export async function getAllTasksWithUser() {
+  return await sql`
+    SELECT t.id, t." title" AS title, t.description, t.status, t.start_date, t.end_date, t.recurrence, t.id_user, u.name AS user_name
+    FROM "task" t
+    JOIN "user" u ON t.id_user = u.id
+    ORDER BY t.id DESC
+  `;
+}
+
+export async function createTask({ title, description, start_date, end_date, recurrence, id_user }) {
+  const result = await sql`
+    INSERT INTO "task" (" title", description, status, start_date, end_date, recurrence, id_user)
+    VALUES (${title}, ${description}, 0, ${start_date}, ${end_date}, ${recurrence}, ${id_user})
+    RETURNING id, " title" AS title, status
+  `;
+  return result[0] || null;
+}
+
+export async function deleteTask(taskId) {
+  const result = await sql`
+    DELETE FROM "task" 
+    WHERE id = ${taskId}
+    RETURNING id
+  `;
+  return result[0] || null;
+}
+
