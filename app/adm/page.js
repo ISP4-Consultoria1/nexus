@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { 
-  loginAction, 
   fetchUsersAction, 
   fetchAllTasksWithUserAction, 
   createTaskAction, 
@@ -10,11 +10,10 @@ import {
 } from '../actions.js';
 
 export default function AdminDashboard() {
+  const router = useRouter();
   // Estado de Autenticação e Usuário Admin
   const [admin, setAdmin] = useState(null);
-  const [keyInput, setKeyInput] = useState('');
   const [loading, setLoading] = useState(true);
-  const [authError, setAuthError] = useState('');
 
   // Listas do Sistema
   const [users, setUsers] = useState([]);
@@ -73,13 +72,13 @@ export default function AdminDashboard() {
       setAdmin(parsed);
       loadDashboardData();
     } else {
-      setLoading(false);
+      router.push('/');
     }
     // Set default start/end dates
     const today = new Date().toISOString().split('T')[0];
     setFormStartDate(today);
     setFormEndDate(today);
-  }, []);
+  }, [router]);
 
   // Carregar dados gerais (usuários e tarefas)
   const loadDashboardData = async () => {
@@ -98,29 +97,7 @@ export default function AdminDashboard() {
     }
   };
 
-  // Login do Administrador
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    if (!keyInput.trim()) return;
-
-    setLoading(true);
-    setAuthError('');
-    try {
-      const loggedUser = await loginAction(keyInput.trim());
-      
-      // Validar se tem privilégios de administrador (access === 1)
-      if (loggedUser.access !== 1) {
-        throw new Error('Acesso negado. Apenas administradores podem acessar este painel.');
-      }
-
-      setAdmin(loggedUser);
-      localStorage.setItem('nexus_admin', JSON.stringify(loggedUser));
-      await loadDashboardData();
-    } catch (err) {
-      setAuthError(err.message || 'Erro ao conectar. Verifique sua chave.');
-      setLoading(false);
-    }
-  };
+  // Autenticação tratada na raiz centralizada
 
   // Logout do Administrador
   const handleLogout = () => {
@@ -128,6 +105,7 @@ export default function AdminDashboard() {
     setAdmin(null);
     setTasks([]);
     setUsers([]);
+    router.push('/');
   };
 
   // Criar uma nova tarefa
@@ -230,61 +208,27 @@ export default function AdminDashboard() {
   // Tela de Carregamento Geral (Login)
   if (loading && !admin) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: 'var(--bg-color)', color: 'var(--text-secondary)', fontFamily: 'var(--font-family)' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div className="login-logo" style={{ animation: 'pulse 1.5s infinite', margin: '0 auto 1.5rem auto' }}>
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <p>Carregando Painel Admin...</p>
+      <div className="transition-screen">
+        <div className="login-logo" style={{ animation: 'pulse 1.5s infinite' }}>
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ width: '28px', height: '28px' }}>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+          </svg>
         </div>
+        <p>Carregando painel admin...</p>
       </div>
     );
   }
 
-  // Tela de Login (Admin)
+  // Tela de Login (Redirecionamento para a raiz centralizada)
   if (!admin) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: 'var(--bg-color)', fontFamily: 'var(--font-family)' }}>
-        <div style={{ width: '100%', maxWidth: '400px', padding: '1.5rem' }}>
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <div className="login-logo" style={{ margin: '0 auto 1.5rem auto' }}>
-              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h1 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>
-              Nexus GRR
-            </h1>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-              Painel de Administração e Gestão
-            </p>
-          </div>
-
-          <form className="login-card" onSubmit={handleLogin}>
-            <input
-              type="password"
-              className="login-input"
-              placeholder="Digite a chave de administrador..."
-              value={keyInput}
-              onChange={(e) => setKeyInput(e.target.value)}
-              disabled={loading}
-            />
-            {authError && (
-              <p style={{ color: 'var(--color-red)', fontSize: '0.85rem', marginBottom: '1.25rem', fontWeight: 500 }}>
-                {authError}
-              </p>
-            )}
-            <button type="submit" className="login-button" disabled={loading}>
-              {loading ? 'Acessando...' : 'Acessar Administrador'}
-            </button>
-          </form>
-
-          <div className="hint-box" style={{ textAlign: 'center' }}>
-            <span>Chave de administrador: <strong>admin123</strong></span>
-          </div>
+      <div className="transition-screen">
+        <div className="login-logo" style={{ animation: 'pulse 1.5s infinite' }}>
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ width: '28px', height: '28px' }}>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+          </svg>
         </div>
+        <p>Redirecionando para login...</p>
       </div>
     );
   }

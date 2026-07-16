@@ -64,3 +64,14 @@ export async function deleteTask(taskId) {
   return result[0] || null;
 }
 
+export async function getTaskById(taskId) {
+  const result = await sql`
+    SELECT id, " title" AS title, description, status, start_date, end_date, recurrence, id_user 
+    FROM "task" 
+    WHERE id = ${taskId} 
+    LIMIT 1
+  `;
+  return result[0] || null;
+}
+
+

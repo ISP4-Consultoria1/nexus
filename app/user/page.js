@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { loginAction, fetchTasksAction, updateTaskStatusAction } from '../actions.js';
+import { useRouter } from 'next/navigation';
+import { fetchTasksAction, updateTaskStatusAction } from '../actions.js';
 
 const recurrenceLabels = {
   1: 'Diária',
@@ -13,11 +14,10 @@ const recurrenceLabels = {
 };
 
 export default function UserDashboard() {
+  const router = useRouter();
   // Estado de Autenticação e Usuário
   const [user, setUser] = useState(null);
-  const [keyInput, setKeyInput] = useState('');
   const [loading, setLoading] = useState(true);
-  const [authError, setAuthError] = useState('');
 
   // Estado das Tarefas
   const [tasks, setTasks] = useState([]);
@@ -55,9 +55,9 @@ export default function UserDashboard() {
       setUser(parsed);
       loadTasks(parsed.id);
     } else {
-      setLoading(false);
+      router.push('/');
     }
-  }, []);
+  }, [router]);
 
   // 2. Registro do Service Worker e PWA
   useEffect(() => {
@@ -92,29 +92,14 @@ export default function UserDashboard() {
     }
   };
 
-  // Função de Login
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    if (!keyInput.trim()) return;
-
-    setLoading(true);
-    setAuthError('');
-    try {
-      const loggedUser = await loginAction(keyInput.trim());
-      setUser(loggedUser);
-      localStorage.setItem('nexus_user', JSON.stringify(loggedUser));
-      await loadTasks(loggedUser.id);
-    } catch (err) {
-      setAuthError(err.message || 'Erro ao conectar. Verifique sua chave.');
-      setLoading(false);
-    }
-  };
+  // Autenticação tratada centralizadamente na raiz
 
   // Função de Logout
   const handleLogout = () => {
     localStorage.removeItem('nexus_user');
     setUser(null);
     setTasks([]);
+    router.push('/');
   };
 
   // Função para instalar o PWA
@@ -305,59 +290,27 @@ export default function UserDashboard() {
   // Tela de carregamento geral
   if (loading && !user) {
     return (
-      <div className="mobile-viewport" style={{ justifyContent: 'center', alignItems: 'center' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-          <div className="login-logo" style={{ animation: 'pulse 1.5s infinite' }}>
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Carregando Nexus...</p>
+      <div className="transition-screen">
+        <div className="login-logo" style={{ animation: 'pulse 1.5s infinite' }}>
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ width: '28px', height: '28px' }}>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+          </svg>
         </div>
+        <p>Carregando painel...</p>
       </div>
     );
   }
 
-  // Tela de Login (Chave de Acesso)
+  // Tela de Login (Redirecionamento para a raiz centralizada)
   if (!user) {
     return (
-      <div className="mobile-viewport">
-        <div className="login-container">
-          <div className="login-logo">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: '800', marginBottom: '0.25rem', letterSpacing: '-0.5px' }}>
-            Nexus GRR
-          </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '2rem' }}>
-            Gerenciador de Resultados e Rotinas
-          </p>
-
-          <form className="login-card" onSubmit={handleLogin}>
-            <input
-              type="password"
-              className="login-input"
-              placeholder="Digite sua chave de acesso..."
-              value={keyInput}
-              onChange={(e) => setKeyInput(e.target.value)}
-              disabled={loading}
-            />
-            {authError && (
-              <p style={{ color: 'var(--color-red)', fontSize: '0.85rem', marginBottom: '1.25rem', fontWeight: 500 }}>
-                {authError}
-              </p>
-            )}
-            <button type="submit" className="login-button" disabled={loading}>
-              {loading ? 'Entrando...' : 'Acessar Painel'}
-            </button>
-          </form>
-
-          <div className="hint-box">
-            <span>Chave de teste: <strong>lucas123</strong></span>
-          </div>
+      <div className="transition-screen">
+        <div className="login-logo" style={{ animation: 'pulse 1.5s infinite' }}>
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ width: '28px', height: '28px' }}>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+          </svg>
         </div>
+        <p>Redirecionando para login...</p>
       </div>
     );
   }
