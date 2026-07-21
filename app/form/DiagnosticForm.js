@@ -172,7 +172,7 @@ export default function DiagnosticForm() {
           <div className="diagnostic-scale-legend">
             <div><strong>0</strong><span>Nota mínima</span></div>
             <div><strong>10</strong><span>Nota máxima</span></div>
-            <p>A autoavaliação é uma nota livre de 0 a 10 e será exibida separadamente da avaliação CFE, exatamente como na planilha.</p>
+            <p>A autoavaliação é uma nota livre de 0 a 10 e será exibida separadamente da avaliação CFE.</p>
           </div>
         </section>
       ) : (
