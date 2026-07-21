@@ -1374,10 +1374,11 @@ body {
 }
 
 .diagnostic-form-progress {
-  padding: 1rem 1.25rem;
-  border: 1px solid var(--panel-border);
-  border-radius: 16px;
-  background: rgba(20, 27, 45, 0.72);
+  padding: 1.15rem 1.25rem;
+  border: 1px solid rgba(16, 185, 129, 0.14);
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(20, 27, 45, 0.88), rgba(15, 23, 42, 0.72));
+  box-shadow: 0 18px 40px -28px rgba(0, 0, 0, 0.8);
 }
 
 .diagnostic-progress-copy {
@@ -1406,8 +1407,8 @@ body {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: #56f0f8;
-  box-shadow: 0 0 12px rgba(86, 240, 248, 0.35);
+  background: linear-gradient(90deg, #059669, var(--color-green));
+  box-shadow: 0 0 12px var(--color-green-glow);
   transition: width 0.25s ease;
 }
 
@@ -1427,12 +1428,19 @@ body {
   background: rgba(255, 255, 255, 0.025);
   font: 600 0.72rem var(--font-family);
   cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
 .diagnostic-step-tabs button.active {
-  border-color: #56f0f8;
-  color: #0c2434;
-  background: #56f0f8;
+  border-color: var(--color-green);
+  color: white;
+  background: var(--color-green);
+  box-shadow: 0 6px 16px -8px var(--color-green-glow);
+}
+
+.diagnostic-step-tabs button:hover {
+  border-color: rgba(16, 185, 129, 0.5);
+  color: var(--text-primary);
 }
 
 .diagnostic-self-summary {
@@ -1444,7 +1452,7 @@ body {
 .diagnostic-self-summary > strong {
   display: block;
   margin-bottom: 0.55rem;
-  color: #56f0f8;
+  color: #6ee7b7;
   font-size: 0.68rem;
   letter-spacing: 0.05em;
 }
@@ -1462,7 +1470,8 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.035);
+  border-radius: 9px;
   background: rgba(255, 255, 255, 0.035);
 }
 
@@ -1481,30 +1490,35 @@ body {
 
 .diagnostic-sheet {
   overflow: hidden;
-  border: 1px solid rgba(31, 41, 66, 0.28);
-  border-radius: 4px;
-  color: #242124;
-  background: #fff;
-  box-shadow: 0 22px 45px -24px rgba(0, 0, 0, 0.6);
-  font-family: Calibri, Arial, sans-serif;
+  border: 1px solid rgba(148, 163, 184, 0.26);
+  border-radius: 18px;
+  color: #1e293b;
+  background: #f8fafc;
+  box-shadow: 0 28px 60px -34px rgba(0, 0, 0, 0.85);
+  font-family: var(--font-family);
 }
 
 .diagnostic-sheet-titlebar {
-  min-height: 64px;
-  padding: 1rem 1.5rem;
+  min-height: 72px;
+  padding: 1rem 1.4rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
   color: white;
-  background: #1f2942;
-  font-size: 1.05rem;
-  font-weight: 700;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.3);
+  background: linear-gradient(135deg, #111827, #172033);
 }
 
-.diagnostic-sheet-titlebar span:last-child {
-  color: #56f0f8;
-  font-size: 0.82rem;
+.diagnostic-sheet-meta {
+  padding: 0.4rem 0.7rem;
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  border-radius: 999px;
+  color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.08);
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .diagnostic-sheet-brand {
@@ -1514,20 +1528,42 @@ body {
 }
 
 .diagnostic-sheet-brand img {
-  width: 48px;
-  height: 48px;
+  width: 42px;
+  height: 42px;
   object-fit: contain;
   border-radius: 50%;
   background: white;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
+}
+
+.diagnostic-sheet-brand-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+}
+
+.diagnostic-sheet-brand-copy small {
+  color: #6ee7b7;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.diagnostic-sheet-brand-copy strong {
+  color: white;
+  font-size: 1rem;
+  line-height: 1.2;
 }
 
 .diagnostic-sheet-heading {
   padding: 2.5rem;
+  background: white;
   text-align: center;
 }
 
 .diagnostic-sheet-kicker {
-  color: #1f5a75;
+  color: #047857;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -1536,12 +1572,12 @@ body {
 
 .diagnostic-sheet-heading h1 {
   margin: 0.5rem 0;
-  color: #1f2942;
+  color: #172033;
   font-size: clamp(1.8rem, 5vw, 2.8rem);
 }
 
 .diagnostic-sheet-heading p {
-  color: #687386;
+  color: #64748b;
 }
 
 .diagnostic-identification-grid {
@@ -1551,6 +1587,7 @@ body {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 1rem;
+  background: white;
 }
 
 .diagnostic-identification-grid label,
@@ -1558,7 +1595,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
-  color: #465064;
+  color: #475569;
   font-size: 0.78rem;
   font-weight: 600;
 }
@@ -1568,11 +1605,11 @@ body {
   width: 100%;
   height: 44px;
   padding: 0 0.85rem;
-  border: 1px solid #cad2df;
-  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
   outline: none;
-  color: #242124;
-  background: white;
+  color: #172033;
+  background: #f8fafc;
   font: 400 0.92rem var(--font-family);
   user-select: text;
 }
@@ -1581,8 +1618,8 @@ body {
 .diagnostic-responsibles-grid input:focus,
 .diagnostic-question-row select:focus,
 .diagnostic-score-field input:focus {
-  border-color: #1f2942;
-  box-shadow: 0 0 0 3px rgba(86, 240, 248, 0.24);
+  border-color: var(--color-green);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.16);
 }
 
 .diagnostic-scale-legend {
@@ -1592,8 +1629,8 @@ body {
   grid-template-columns: auto auto 1fr;
   align-items: center;
   gap: 1rem;
-  border-top: 1px solid #dce1e8;
-  background: #e5f8ff;
+  border-top: 1px solid #dbe7e2;
+  background: #ecfdf5;
 }
 
 .diagnostic-scale-legend div {
@@ -1602,19 +1639,19 @@ body {
   flex-direction: column;
   align-items: center;
   padding: 0.7rem;
-  border: 1px solid rgba(31, 41, 66, 0.18);
-  border-radius: 6px;
+  border: 1px solid rgba(16, 185, 129, 0.16);
+  border-radius: 12px;
   background: white;
 }
 
 .diagnostic-scale-legend strong {
-  color: #1f2942;
+  color: #047857;
   font-size: 1.25rem;
 }
 
 .diagnostic-scale-legend span,
 .diagnostic-scale-legend p {
-  color: #687386;
+  color: #64748b;
   font-size: 0.75rem;
   line-height: 1.5;
 }
@@ -1624,8 +1661,8 @@ body {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
-  background: #e5f8ff;
-  border-bottom: 1px solid #cbd5df;
+  background: #ecfdf5;
+  border-bottom: 1px solid #dbe7e2;
 }
 
 .diagnostic-question-head,
@@ -1636,7 +1673,7 @@ body {
 
 .diagnostic-question-head {
   color: white;
-  background: #1f2942;
+  background: #172033;
   font-size: 0.75rem;
   font-weight: 700;
   text-align: center;
@@ -1648,13 +1685,17 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-right: 1px solid rgba(255, 255, 255, 0.16);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .diagnostic-question-row {
   min-height: 110px;
-  border-bottom: 1px solid #d8dde5;
+  border-bottom: 1px solid #e2e8f0;
   background: #fff;
+}
+
+.diagnostic-question-row:nth-child(odd) {
+  background: #fbfdfc;
 }
 
 .diagnostic-question-row:last-child {
@@ -1663,7 +1704,7 @@ body {
 
 .diagnostic-question-row > * {
   padding: 1rem;
-  border-right: 1px solid #d8dde5;
+  border-right: 1px solid #e2e8f0;
 }
 
 .diagnostic-question-row > *:last-child {
@@ -1678,19 +1719,19 @@ body {
 }
 
 .diagnostic-question-item span {
-  color: #758092;
+  color: #059669;
   font-size: 0.72rem;
 }
 
 .diagnostic-question-item strong {
-  color: #1f2942;
+  color: #172033;
   font-size: 0.88rem;
 }
 
 .diagnostic-question-row > p {
   display: flex;
   align-items: center;
-  color: #374151;
+  color: #475569;
   font-size: 0.84rem;
   line-height: 1.5;
 }
@@ -1709,10 +1750,10 @@ body {
 .diagnostic-score-field input {
   width: 100%;
   height: 42px;
-  border: 1px solid #bdc6d3;
-  border-radius: 5px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
   outline: none;
-  color: #1f2942;
+  color: #172033;
   background: #f8fafc;
   font: 600 0.85rem var(--font-family);
   text-align: center;
@@ -1729,7 +1770,7 @@ body {
 }
 
 .diagnostic-score-field small {
-  color: #758092;
+  color: #64748b;
   font-size: 0.72rem;
   white-space: nowrap;
 }
@@ -1749,15 +1790,22 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border-radius: 10px;
+  border-radius: 12px;
   font: 600 0.88rem var(--font-family);
   cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .diagnostic-primary-button {
-  border: 1px solid #56f0f8;
-  color: #102130;
-  background: #56f0f8;
+  border: 1px solid var(--color-green);
+  color: white;
+  background: var(--color-green);
+  box-shadow: 0 10px 22px -12px var(--color-green-glow);
+}
+
+.diagnostic-primary-button:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-1px);
 }
 
 .diagnostic-primary-button svg {
@@ -1776,6 +1824,10 @@ body {
   background: rgba(255, 255, 255, 0.04);
 }
 
+.diagnostic-secondary-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
 .diagnostic-form-error {
   padding: 0.8rem 1rem;
   border: 1px solid rgba(239, 68, 68, 0.25);
@@ -1792,8 +1844,8 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 1px solid #d7dde6;
-  border-radius: 4px;
+  border: 1px solid rgba(16, 185, 129, 0.18);
+  border-radius: 18px;
   color: #242124;
   background: white;
   text-align: center;
@@ -1807,8 +1859,9 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  color: #1f2942;
-  background: #56f0f8;
+  color: white;
+  background: var(--color-green);
+  box-shadow: 0 12px 26px -12px var(--color-green-glow);
 }
 
 .diagnostic-success-icon svg {
@@ -1818,7 +1871,7 @@ body {
 
 .diagnostic-form-success h1 {
   margin: 0.5rem 0;
-  color: #1f2942;
+  color: #172033;
   font-size: 1.8rem;
 }
 
@@ -1866,7 +1919,7 @@ body {
 
   .diagnostic-mobile-field-label > span {
     display: block;
-    color: #687386;
+    color: #64748b;
     font-size: 0.7rem;
     font-weight: 600;
   }
@@ -1881,6 +1934,11 @@ body {
 }
 
 @media (max-width: 560px) {
+  .diagnostic-sheet-titlebar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
   .diagnostic-sheet-titlebar,
   .diagnostic-responsibles-grid,
   .diagnostic-identification-grid,

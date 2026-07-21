@@ -152,7 +152,14 @@ export default function DiagnosticForm() {
       {step === 0 ? (
         <section className="diagnostic-sheet diagnostic-identification-sheet">
           <div className="diagnostic-sheet-titlebar">
-            <span className="diagnostic-sheet-brand"><img src="/isp4-logo.svg" alt="ISP4 Consultoria" />DIAGNÓSTICO EMPRESARIAL</span>
+            <span className="diagnostic-sheet-brand">
+              <img src="/isp4-logo.svg" alt="ISP4 Consultoria" />
+              <span className="diagnostic-sheet-brand-copy">
+                <small>Metodologia ISP4</small>
+                <strong>Diagnóstico empresarial</strong>
+              </span>
+            </span>
+            <span className="diagnostic-sheet-meta">Etapa inicial</span>
           </div>
           <div className="diagnostic-sheet-heading">
             <span className="diagnostic-sheet-kicker">Questionário inicial</span>
@@ -178,8 +185,14 @@ export default function DiagnosticForm() {
       ) : (
         <section className="diagnostic-sheet">
           <div className="diagnostic-sheet-titlebar">
-            <span className="diagnostic-sheet-brand"><img src="/isp4-logo.svg" alt="ISP4 Consultoria" />{activeSection.name}</span>
-            <span>Nota Autoavaliação ▼</span>
+            <span className="diagnostic-sheet-brand">
+              <img src="/isp4-logo.svg" alt="ISP4 Consultoria" />
+              <span className="diagnostic-sheet-brand-copy">
+                <small>Metodologia ISP4</small>
+                <strong>{activeSection.name}</strong>
+              </span>
+            </span>
+            <span className="diagnostic-sheet-meta">Autoavaliação · 0 a 10</span>
           </div>
 
           <div className="diagnostic-responsibles-grid">
