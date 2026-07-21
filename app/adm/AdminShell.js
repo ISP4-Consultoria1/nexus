@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { getSessionAction, logoutAction } from '../actions.js';
 
 const menuItems = [
   {
@@ -26,23 +27,28 @@ export default function AdminShell({ children }) {
   const [checkingSession, setCheckingSession] = useState(true);
 
   useEffect(() => {
-    const savedAdmin = localStorage.getItem('nexus_admin');
-    if (!savedAdmin) {
-      router.replace('/');
-      return;
-    }
+    let active = true;
+    localStorage.removeItem('nexus_user');
+    localStorage.removeItem('nexus_admin');
+    getSessionAction()
+      .then(user => {
+        if (!active) return;
+        if (!user) {
+          router.replace('/');
+        } else if (user.access !== 1) {
+          router.replace('/grr');
+        } else {
+          setAdmin(user);
+          setCheckingSession(false);
+        }
+      })
+      .catch(() => router.replace('/'));
 
-    try {
-      setAdmin(JSON.parse(savedAdmin));
-      setCheckingSession(false);
-    } catch {
-      localStorage.removeItem('nexus_admin');
-      router.replace('/');
-    }
+    return () => { active = false; };
   }, [router]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('nexus_admin');
+  const handleLogout = async () => {
+    await logoutAction();
     router.push('/');
   };
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { loginAction } from './actions.js';
+import { getSessionAction, loginAction } from './actions.js';
 
 export default function CentralizedLogin() {
   const router = useRouter();
@@ -10,18 +10,27 @@ export default function CentralizedLogin() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Verificar se o usuário ou admin já está autenticado e redirecionar
   useEffect(() => {
-    const savedAdmin = localStorage.getItem('nexus_admin');
-    const savedUser = localStorage.getItem('nexus_user');
+    let active = true;
 
-    if (savedAdmin) {
-      router.push('/adm/grr');
-    } else if (savedUser) {
-      router.push('/grr');
-    } else {
-      setLoading(false);
-    }
+    // Remove o formato antigo, que armazenava usuário e chave no navegador.
+    localStorage.removeItem('nexus_admin');
+    localStorage.removeItem('nexus_user');
+
+    getSessionAction()
+      .then(user => {
+        if (!active) return;
+        if (user) {
+          router.replace(user.access === 1 ? '/adm/grr' : '/grr');
+        } else {
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => { active = false; };
   }, [router]);
 
   const handleSubmit = async (e) => {
@@ -31,19 +40,20 @@ export default function CentralizedLogin() {
     setLoading(true);
     setError('');
     try {
-      const loggedUser = await loginAction(keyInput.trim());
+      const result = await loginAction(keyInput.trim());
+      if (!result.ok) {
+        setError(result.error);
+        setLoading(false);
+        return;
+      }
 
-      if (loggedUser.access === 1) {
-        // Salvar sessão administrativa e redirecionar
-        localStorage.setItem('nexus_admin', JSON.stringify(loggedUser));
+      if (result.user.access === 1) {
         router.push('/adm/grr');
       } else {
-        // Salvar sessão do usuário comum e redirecionar
-        localStorage.setItem('nexus_user', JSON.stringify(loggedUser));
         router.push('/grr');
       }
-    } catch (err) {
-      setError(err.message || 'Erro de conexão. Verifique sua chave.');
+    } catch {
+      setError('Não foi possível acessar o sistema. Tente novamente.');
       setLoading(false);
     }
   };

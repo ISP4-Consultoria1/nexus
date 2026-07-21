@@ -117,7 +117,7 @@ export default function DiagnosticReview() {
         setAnswers(normalizeAnswers(data));
         setSectionData(normalizeSections(data));
       })
-      .catch(error => setLoadError(error.message || 'Não foi possível carregar o diagnóstico.'))
+      .catch(() => setLoadError('Não foi possível carregar o diagnóstico.'))
       .finally(() => setLoading(false));
   }, [publicId]);
 
@@ -155,8 +155,8 @@ export default function DiagnosticReview() {
       })), DIAGNOSTIC_SECTIONS.map(section => ({ sectionCode: section.code, ...sectionData[section.code] })));
       setDiagnostic(updated);
       setSaveMessage('Avaliação CFE salva e resultados recalculados.');
-    } catch (error) {
-      setSaveMessage(error.message || 'Não foi possível salvar a avaliação.');
+    } catch {
+      setSaveMessage('Não foi possível salvar a avaliação. Tente novamente.');
     } finally {
       setSaving(false);
     }

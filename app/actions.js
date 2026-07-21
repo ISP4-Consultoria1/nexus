@@ -3,7 +3,7 @@
 import { 
   getUserByKey, 
   getTasksByUserId, 
-  updateTaskStatus,
+  updateTaskStatusForUser,
   getAllUsers,
   getAllTasksWithUser,
   createTask,
@@ -18,26 +18,52 @@ import {
   saveDiagnosticReview
 } from '../functions/diagnosticQueries.js';
 import { ALL_DIAGNOSTIC_QUESTIONS, DIAGNOSTIC_SECTIONS, EVALUATION_OPTIONS } from '../lib/diagnosticCatalog.js';
+import {
+  createSession,
+  deleteSession,
+  getSessionUser,
+  requireAdmin,
+  requireSessionUser
+} from '../lib/session.js';
 
 export async function loginAction(key) {
-  if (!key) {
-    throw new Error('Chave não informada');
+  const normalizedKey = String(key || '').trim();
+  if (!normalizedKey) {
+    return { ok: false, error: 'Informe sua chave de acesso.' };
   }
-  const user = await getUserByKey(key);
-  if (!user) {
-    throw new Error('Chave inválida');
+
+  try {
+    const user = await getUserByKey(normalizedKey);
+    if (!user) {
+      return { ok: false, error: 'Chave de acesso inválida.' };
+    }
+
+    await createSession(user.id);
+    return {
+      ok: true,
+      user: { id: Number(user.id), name: user.name, access: Number(user.access) }
+    };
+  } catch (error) {
+    console.error('Falha ao autenticar usuário:', error);
+    return { ok: false, error: 'Não foi possível acessar o sistema. Tente novamente.' };
   }
-  return user;
 }
 
-export async function fetchTasksAction(userId) {
-  if (!userId) {
-    throw new Error('userId não informado');
-  }
-  const tasks = await getTasksByUserId(userId);
+export async function getSessionAction() {
+  return await getSessionUser();
+}
+
+export async function logoutAction() {
+  await deleteSession();
+  return { ok: true };
+}
+
+export async function fetchTasksAction() {
+  const user = await requireSessionUser();
+  const tasks = await getTasksByUserId(user.id);
   const needsReload = await processRecurringTasks(tasks);
   if (needsReload) {
-    return await getTasksByUserId(userId);
+    return await getTasksByUserId(user.id);
   }
   return tasks;
 }
@@ -128,21 +154,29 @@ async function processRecurringTasks(tasks) {
 }
 
 export async function updateTaskStatusAction(taskId, status) {
-  if (taskId === undefined || status === undefined) {
-    throw new Error('Parâmetros inválidos');
+  const user = await requireSessionUser();
+  const normalizedTaskId = Number(taskId);
+  const normalizedStatus = Number(status);
+  if (
+    !Number.isInteger(normalizedTaskId) || normalizedTaskId <= 0 ||
+    !Number.isInteger(normalizedStatus) || normalizedStatus < 0 || normalizedStatus > 5
+  ) {
+    return { ok: false, error: 'Não foi possível atualizar essa tarefa.' };
   }
-  const updated = await updateTaskStatus(taskId, status);
+  const updated = await updateTaskStatusForUser(normalizedTaskId, normalizedStatus, user.id);
   if (!updated) {
-    throw new Error('Tarefa não encontrada');
+    return { ok: false, error: 'Tarefa não encontrada ou não pertence a este usuário.' };
   }
-  return updated;
+  return { ok: true, task: updated };
 }
 
 export async function fetchUsersAction() {
+  await requireAdmin();
   return await getAllUsers();
 }
 
 export async function fetchAllTasksWithUserAction() {
+  await requireAdmin();
   const tasks = await getAllTasksWithUser();
   const needsReload = await processRecurringTasks(tasks);
   if (needsReload) {
@@ -152,21 +186,24 @@ export async function fetchAllTasksWithUserAction() {
 }
 
 export async function createTaskAction(taskData) {
+  await requireAdmin();
   if (!taskData.title || !taskData.end_date || !taskData.id_user) {
-    throw new Error('Preencha os campos obrigatórios (título, prazo e usuário).');
+    return { ok: false, error: 'Preencha os campos obrigatórios (título, prazo e usuário).' };
   }
-  return await createTask(taskData);
+  const task = await createTask(taskData);
+  return { ok: true, task };
 }
 
 export async function deleteTaskAction(taskId) {
+  await requireAdmin();
   if (!taskId) {
-    throw new Error('taskId não informado');
+    return { ok: false, error: 'Tarefa não informada.' };
   }
   const deleted = await deleteTask(taskId);
   if (!deleted) {
-    throw new Error('Tarefa não encontrada');
+    return { ok: false, error: 'Tarefa não encontrada.' };
   }
-  return deleted;
+  return { ok: true };
 }
 
 export async function submitDiagnosticAction(payload) {
@@ -224,15 +261,18 @@ export async function submitDiagnosticAction(payload) {
 }
 
 export async function fetchDiagnosticSubmissionsAction() {
+  await requireAdmin();
   return await getDiagnosticSubmissions();
 }
 
 export async function fetchDiagnosticSubmissionAction(publicId) {
+  await requireAdmin();
   if (!/^[0-9a-f-]{36}$/i.test(publicId || '')) return null;
   return await getDiagnosticSubmission(publicId);
 }
 
 export async function saveDiagnosticReviewAction(publicId, receivedAnswers, receivedSections) {
+  await requireAdmin();
   if (!/^[0-9a-f-]{36}$/i.test(publicId || '')) throw new Error('Diagnóstico inválido.');
   const validQuestionCodes = new Set(ALL_DIAGNOSTIC_QUESTIONS.map(question => question.code));
   const validEvaluationCodes = new Set(EVALUATION_OPTIONS.map(option => option.code));

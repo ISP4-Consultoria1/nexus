@@ -106,7 +106,7 @@ export default function AdminDashboard() {
 
     setSubmitting(true);
     try {
-      await createTaskAction({
+      const result = await createTaskAction({
         title: formTitle.trim(),
         description: formDesc.trim() || null,
         start_date: formStartDate,
@@ -114,6 +114,10 @@ export default function AdminDashboard() {
         recurrence: formRecurrence ? parseInt(formRecurrence, 10) : null,
         id_user: parseInt(formUser, 10)
       });
+      if (!result.ok) {
+        setFormError(result.error);
+        return;
+      }
 
       setFormSuccess('Tarefa criada e atribuída com sucesso!');
       setFormTitle('');
@@ -127,8 +131,8 @@ export default function AdminDashboard() {
       // Recarregar lista de tarefas
       const updatedTasks = await fetchAllTasksWithUserAction();
       setTasks(updatedTasks);
-    } catch (err) {
-      setFormError(err.message || 'Erro ao criar tarefa.');
+    } catch {
+      setFormError('Não foi possível criar a tarefa. Tente novamente.');
     } finally {
       setSubmitting(false);
     }
@@ -139,10 +143,14 @@ export default function AdminDashboard() {
     if (!confirm('Deseja realmente excluir esta tarefa permanentemente?')) return;
 
     try {
-      await deleteTaskAction(taskId);
+      const result = await deleteTaskAction(taskId);
+      if (!result.ok) {
+        alert(result.error);
+        return;
+      }
       setTasks(prev => prev.filter(t => t.id !== taskId));
-    } catch (err) {
-      alert(err.message || 'Erro ao deletar tarefa.');
+    } catch {
+      alert('Não foi possível excluir a tarefa. Tente novamente.');
     }
   };
 

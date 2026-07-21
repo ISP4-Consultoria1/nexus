@@ -100,8 +100,8 @@ export default function DiagnosticForm() {
         }))
       });
       setSubmittedId(result.publicId);
-    } catch (submissionError) {
-      setError(submissionError.message || 'Não foi possível enviar o diagnóstico. Tente novamente.');
+    } catch {
+      setError('Não foi possível enviar o diagnóstico. Tente novamente.');
     } finally {
       setSubmitting(false);
     }

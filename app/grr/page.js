@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { fetchTasksAction, updateTaskStatusAction } from '../actions.js';
+import { fetchTasksAction, getSessionAction, logoutAction, updateTaskStatusAction } from '../actions.js';
 
 const recurrenceLabels = {
   1: 'Diária',
@@ -47,16 +47,27 @@ export default function UserDashboard() {
   // Bounding boxes dos botões (cacheados no início do arraste)
   const targetRects = useRef({ red: null, yellow: null, blue: null });
 
-  // 1. Verificar se o usuário já está logado
   useEffect(() => {
-    const savedUser = localStorage.getItem('nexus_user');
-    if (savedUser) {
-      const parsed = JSON.parse(savedUser);
-      setUser(parsed);
-      loadTasks(parsed.id);
-    } else {
-      router.push('/');
-    }
+    let active = true;
+    localStorage.removeItem('nexus_user');
+    localStorage.removeItem('nexus_admin');
+    getSessionAction()
+      .then(sessionUser => {
+        if (!active) return;
+        if (!sessionUser) {
+          router.replace('/');
+          return;
+        }
+        if (sessionUser.access === 1) {
+          router.replace('/adm/grr');
+          return;
+        }
+        setUser(sessionUser);
+        loadTasks();
+      })
+      .catch(() => router.replace('/'));
+
+    return () => { active = false; };
   }, [router]);
 
   // 2. Registro do Service Worker e PWA
@@ -80,10 +91,10 @@ export default function UserDashboard() {
   }, []);
 
   // Função para carregar tarefas
-  const loadTasks = async (userId) => {
+  const loadTasks = async () => {
     try {
       setLoading(true);
-      const fetchedTasks = await fetchTasksAction(userId);
+      const fetchedTasks = await fetchTasksAction();
       setTasks(fetchedTasks);
     } catch (err) {
       console.error("Erro ao carregar tarefas:", err);
@@ -95,8 +106,8 @@ export default function UserDashboard() {
   // Autenticação tratada centralizadamente na raiz
 
   // Função de Logout
-  const handleLogout = () => {
-    localStorage.removeItem('nexus_user');
+  const handleLogout = async () => {
+    await logoutAction();
     setUser(null);
     setTasks([]);
     router.push('/');
@@ -156,11 +167,12 @@ export default function UserDashboard() {
       setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
       
       // Salva no banco de dados
-      await updateTaskStatusAction(taskId, newStatus);
+      const result = await updateTaskStatusAction(taskId, newStatus);
+      if (!result.ok) throw new Error(result.error);
     } catch (err) {
       console.error("Erro ao atualizar status da tarefa:", err);
       // Recarrega do banco se falhar para sincronizar
-      if (user) loadTasks(user.id);
+      if (user) loadTasks();
     }
   };
 

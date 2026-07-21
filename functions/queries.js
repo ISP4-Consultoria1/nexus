@@ -2,9 +2,19 @@ import sql from './db.js';
 
 export async function getUserByKey(key) {
   const users = await sql`
-    SELECT id, name, key, access 
+    SELECT id, name, access
     FROM "user" 
     WHERE key = ${key} 
+    LIMIT 1
+  `;
+  return users[0] || null;
+}
+
+export async function getUserById(userId) {
+  const users = await sql`
+    SELECT id, name, access
+    FROM "user"
+    WHERE id = ${userId}
     LIMIT 1
   `;
   return users[0] || null;
@@ -19,11 +29,11 @@ export async function getTasksByUserId(userId) {
   `;
 }
 
-export async function updateTaskStatus(taskId, status) {
+export async function updateTaskStatusForUser(taskId, status, userId) {
   const result = await sql`
-    UPDATE "task" 
-    SET status = ${status} 
-    WHERE id = ${taskId} 
+    UPDATE "task"
+    SET status = ${status}
+    WHERE id = ${taskId} AND id_user = ${userId}
     RETURNING id, title, status
   `;
   return result[0] || null;
@@ -31,7 +41,7 @@ export async function updateTaskStatus(taskId, status) {
 
 export async function getAllUsers() {
   return await sql`
-    SELECT id, name, key, access 
+    SELECT id, name, access
     FROM "user" 
     ORDER BY name ASC
   `;
@@ -82,4 +92,3 @@ export async function updateTaskDatesAndStatus(taskId, startDate, endDate, statu
     RETURNING id
   `;
 }
-
