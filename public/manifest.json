@@ -2,7 +2,7 @@
   "name": "Nexus GRR",
   "short_name": "Nexus GRR",
   "description": "Gerenciador de Tarefas Nexus",
-  "start_url": "/user",
+  "start_url": "/grr",
   "display": "standalone",
   "background_color": "#0b1329",
   "theme_color": "#10b981",

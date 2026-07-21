@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { 
   fetchUsersAction, 
   fetchAllTasksWithUserAction, 
@@ -10,9 +9,6 @@ import {
 } from '../actions.js';
 
 export default function AdminDashboard() {
-  const router = useRouter();
-  // Estado de Autenticação e Usuário Admin
-  const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Listas do Sistema
@@ -64,21 +60,13 @@ export default function AdminDashboard() {
     6: 'Anual'
   };
 
-  // 1. Carregar sessão existente
+  // Carregar dados do módulo e definir as datas iniciais do formulário
   useEffect(() => {
-    const savedAdmin = localStorage.getItem('nexus_admin');
-    if (savedAdmin) {
-      const parsed = JSON.parse(savedAdmin);
-      setAdmin(parsed);
-      loadDashboardData();
-    } else {
-      router.push('/');
-    }
-    // Set default start/end dates
+    loadDashboardData();
     const today = new Date().toISOString().split('T')[0];
     setFormStartDate(today);
     setFormEndDate(today);
-  }, [router]);
+  }, []);
 
   // Carregar dados gerais (usuários e tarefas)
   const loadDashboardData = async () => {
@@ -95,17 +83,6 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
-  };
-
-  // Autenticação tratada na raiz centralizada
-
-  // Logout do Administrador
-  const handleLogout = () => {
-    localStorage.removeItem('nexus_admin');
-    setAdmin(null);
-    setTasks([]);
-    setUsers([]);
-    router.push('/');
   };
 
   // Criar uma nova tarefa
@@ -205,30 +182,15 @@ export default function AdminDashboard() {
 
   // --- Renderização condicional por estado ---
 
-  // Tela de Carregamento Geral (Login)
-  if (loading && !admin) {
+  if (loading) {
     return (
-      <div className="transition-screen">
+      <div className="admin-section-loading">
         <div className="login-logo" style={{ animation: 'pulse 1.5s infinite' }}>
           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ width: '28px', height: '28px' }}>
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
           </svg>
         </div>
         <p>Carregando painel admin...</p>
-      </div>
-    );
-  }
-
-  // Tela de Login (Redirecionamento para a raiz centralizada)
-  if (!admin) {
-    return (
-      <div className="transition-screen">
-        <div className="login-logo" style={{ animation: 'pulse 1.5s infinite' }}>
-          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ width: '28px', height: '28px' }}>
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-        <p>Redirecionando para login...</p>
       </div>
     );
   }
@@ -264,26 +226,6 @@ export default function AdminDashboard() {
   });
 
   return (
-    <div className="admin-viewport">
-      {/* Cabeçalho */}
-      <header className="admin-header">
-        <div className="admin-header-title">
-          <span>Nexus GRR</span>
-          <span className="admin-header-badge">Admin</span>
-        </div>
-        <div className="admin-user-info">
-          <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-            Logado como: <strong style={{ color: 'var(--text-primary)' }}>{admin.name}</strong>
-          </span>
-          <button className="header-btn" onClick={handleLogout} title="Sair do Painel Admin">
-            <svg style={{ width: '18px', height: '18px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-          </button>
-        </div>
-      </header>
-
-      {/* Conteúdo Principal (Container Rolável) */}
       <main className="admin-container no-scrollbar">
         
         {/* Painel de Métricas (Stats) */}
@@ -543,6 +485,5 @@ export default function AdminDashboard() {
           </div>
         </section>
       </main>
-    </div>
   );
 }

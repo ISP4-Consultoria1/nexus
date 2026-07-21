@@ -16,9 +16,9 @@ export default function CentralizedLogin() {
     const savedUser = localStorage.getItem('nexus_user');
 
     if (savedAdmin) {
-      router.push('/adm');
+      router.push('/adm/grr');
     } else if (savedUser) {
-      router.push('/user');
+      router.push('/grr');
     } else {
       setLoading(false);
     }
@@ -36,11 +36,11 @@ export default function CentralizedLogin() {
       if (loggedUser.access === 1) {
         // Salvar sessão administrativa e redirecionar
         localStorage.setItem('nexus_admin', JSON.stringify(loggedUser));
-        router.push('/adm');
+        router.push('/adm/grr');
       } else {
         // Salvar sessão do usuário comum e redirecionar
         localStorage.setItem('nexus_user', JSON.stringify(loggedUser));
-        router.push('/user');
+        router.push('/grr');
       }
     } catch (err) {
       setError(err.message || 'Erro de conexão. Verifique sua chave.');
