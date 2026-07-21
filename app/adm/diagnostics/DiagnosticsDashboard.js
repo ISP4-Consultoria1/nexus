@@ -43,7 +43,7 @@ export default function DiagnosticsDashboard() {
         <div>
           <span className="diagnostics-kicker">Diagnóstico empresarial</span>
           <h2>Avaliações e resultados</h2>
-          <p>Questionário, fórmulas, perspectivas e relatórios reproduzidos a partir de “diagnóstico geral.xlsx”.</p>
+          <p>Questionário, fórmulas, perspectivas e relatórios definidos pelo método fixo da aplicação.</p>
         </div>
         <Link className="diagnostics-public-link" href="/form" target="_blank">
           Abrir formulário público

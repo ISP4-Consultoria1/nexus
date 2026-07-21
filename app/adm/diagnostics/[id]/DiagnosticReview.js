@@ -193,8 +193,8 @@ export default function DiagnosticReview() {
       {activeView === 'questionnaire' && (
         <section className="diagnostic-review-questionnaire">
           <div className="diagnostic-visibility-control">
-            <div><strong>Questionário inicial</strong><span>A planilha deixa 6 perspectivas ocultas e 4 visíveis.</span></div>
-            <label><input type="checkbox" checked={showHiddenSections} onChange={event => setShowHiddenSections(event.target.checked)} /> Exibir as 35 perguntas ocultas da planilha</label>
+            <div><strong>Questionário inicial</strong><span>O formulário público apresenta 4 perspectivas; as outras 6 ficam disponíveis para a avaliação interna.</span></div>
+            <label><input type="checkbox" checked={showHiddenSections} onChange={event => setShowHiddenSections(event.target.checked)} /> Exibir as 35 perguntas adicionais</label>
           </div>
 
           {visibleReviewSections.map(section => {

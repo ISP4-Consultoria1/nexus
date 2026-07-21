@@ -237,10 +237,21 @@ export async function saveDiagnosticReviewAction(publicId, receivedAnswers, rece
   const validQuestionCodes = new Set(ALL_DIAGNOSTIC_QUESTIONS.map(question => question.code));
   const validEvaluationCodes = new Set(EVALUATION_OPTIONS.map(option => option.code));
 
-  const answers = (Array.isArray(receivedAnswers) ? receivedAnswers : []).map(answer => {
-    if (!validQuestionCodes.has(answer.questionCode) || !validEvaluationCodes.has(answer.evaluationCode)) {
+  const answerCodes = new Set();
+  const sourceAnswers = Array.isArray(receivedAnswers) ? receivedAnswers : [];
+  if (sourceAnswers.length !== validQuestionCodes.size) {
+    throw new Error('A avaliação deve conter todas as 51 perguntas.');
+  }
+
+  const answers = sourceAnswers.map(answer => {
+    if (
+      !validQuestionCodes.has(answer.questionCode) ||
+      !validEvaluationCodes.has(answer.evaluationCode) ||
+      answerCodes.has(answer.questionCode)
+    ) {
       throw new Error('Resposta de avaliação inválida.');
     }
+    answerCodes.add(answer.questionCode);
 
     const selfScore = answer.selfScore === '' || answer.selfScore == null ? null : Number(answer.selfScore);
     if (selfScore != null && (!Number.isFinite(selfScore) || selfScore < 0 || selfScore > 10)) {
