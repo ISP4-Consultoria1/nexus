@@ -70,7 +70,7 @@ export default function DiagnosticsDashboard() {
           <div className="diagnostics-setup-state">
             <span className="empty-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 4h.01M5.07 19h13.86A2 2 0 0020.66 16L13.73 4a2 2 0 00-3.46 0L3.34 16a2 2 0 001.73 3z" /></svg></span>
             <h3>Estrutura do banco pendente</h3>
-            <p>{loadError} Execute manualmente o arquivo <code>database/diagnostics.sql</code> para habilitar recebimento e avaliação.</p>
+            <p>{loadError} Verifique a configuração e a estrutura do banco de dados.</p>
           </div>
         ) : diagnostics.length === 0 ? (
           <div className="diagnostics-setup-state">
