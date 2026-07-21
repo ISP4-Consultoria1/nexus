@@ -11,6 +11,13 @@ import {
   getTaskById,
   updateTaskDatesAndStatus
 } from '../functions/queries.js';
+import {
+  createPublicDiagnosticSubmission,
+  getDiagnosticSubmissions,
+  getDiagnosticSubmission,
+  saveDiagnosticReview
+} from '../functions/diagnosticQueries.js';
+import { ALL_DIAGNOSTIC_QUESTIONS, DIAGNOSTIC_SECTIONS, EVALUATION_OPTIONS } from '../lib/diagnosticCatalog.js';
 
 export async function loginAction(key) {
   if (!key) {
@@ -160,4 +167,104 @@ export async function deleteTaskAction(taskId) {
     throw new Error('Tarefa não encontrada');
   }
   return deleted;
+}
+
+export async function submitDiagnosticAction(payload) {
+  if (!payload || typeof payload !== 'object') {
+    throw new Error('Dados do diagnóstico não informados.');
+  }
+
+  const companyName = String(payload.companyName || '').trim();
+  if (!companyName || companyName.length > 255) {
+    throw new Error('Informe o nome da empresa.');
+  }
+
+  const validQuestionCodes = new Set(ALL_DIAGNOSTIC_QUESTIONS.map(question => question.code));
+  const receivedAnswers = Array.isArray(payload.answers) ? payload.answers : [];
+  if (receivedAnswers.length !== validQuestionCodes.size) {
+    throw new Error('O diagnóstico deve conter todas as 51 perguntas.');
+  }
+
+  const answerCodes = new Set();
+  const answers = receivedAnswers.map(answer => {
+    const questionCode = String(answer.questionCode || '');
+    if (!validQuestionCodes.has(questionCode) || answerCodes.has(questionCode)) {
+      throw new Error('Foi recebida uma pergunta inválida ou duplicada.');
+    }
+    answerCodes.add(questionCode);
+
+    const score = answer.selfScore === '' || answer.selfScore == null ? null : Number(answer.selfScore);
+    if (score != null && (!Number.isFinite(score) || score < 0 || score > 10)) {
+      throw new Error(`A nota de autoavaliação do item ${questionCode} deve estar entre 0 e 10.`);
+    }
+
+    return {
+      questionCode,
+      applicable: answer.applicable === true || answer.applicable === 'SIM',
+      selfScore: score
+    };
+  });
+
+  const validSectionCodes = new Set(DIAGNOSTIC_SECTIONS.map(section => section.code));
+  const sections = (Array.isArray(payload.sections) ? payload.sections : [])
+    .filter(section => validSectionCodes.has(section.sectionCode))
+    .map(section => ({
+      sectionCode: section.sectionCode,
+      answersResponsible: String(section.answersResponsible || '').trim().slice(0, 255),
+      sectorResponsible: String(section.sectorResponsible || '').trim().slice(0, 255)
+    }));
+
+  const diagnosticDate = /^\d{4}-\d{2}-\d{2}$/.test(payload.diagnosticDate || '')
+    ? payload.diagnosticDate
+    : new Date().toISOString().slice(0, 10);
+  const publicId = crypto.randomUUID();
+
+  await createPublicDiagnosticSubmission({ publicId, companyName, diagnosticDate, sections, answers });
+  return { publicId };
+}
+
+export async function fetchDiagnosticSubmissionsAction() {
+  return await getDiagnosticSubmissions();
+}
+
+export async function fetchDiagnosticSubmissionAction(publicId) {
+  if (!/^[0-9a-f-]{36}$/i.test(publicId || '')) return null;
+  return await getDiagnosticSubmission(publicId);
+}
+
+export async function saveDiagnosticReviewAction(publicId, receivedAnswers, receivedSections) {
+  if (!/^[0-9a-f-]{36}$/i.test(publicId || '')) throw new Error('Diagnóstico inválido.');
+  const validQuestionCodes = new Set(ALL_DIAGNOSTIC_QUESTIONS.map(question => question.code));
+  const validEvaluationCodes = new Set(EVALUATION_OPTIONS.map(option => option.code));
+
+  const answers = (Array.isArray(receivedAnswers) ? receivedAnswers : []).map(answer => {
+    if (!validQuestionCodes.has(answer.questionCode) || !validEvaluationCodes.has(answer.evaluationCode)) {
+      throw new Error('Resposta de avaliação inválida.');
+    }
+
+    const selfScore = answer.selfScore === '' || answer.selfScore == null ? null : Number(answer.selfScore);
+    if (selfScore != null && (!Number.isFinite(selfScore) || selfScore < 0 || selfScore > 10)) {
+      throw new Error(`A nota de autoavaliação do item ${answer.questionCode} deve estar entre 0 e 10.`);
+    }
+
+    return {
+      questionCode: answer.questionCode,
+      applicable: answer.applicable === true || answer.applicable === 'SIM',
+      selfScore,
+      evaluationCode: answer.evaluationCode,
+      consultantObservation: String(answer.consultantObservation || '').slice(0, 10000),
+      possibleImprovements: String(answer.possibleImprovements || '').slice(0, 10000)
+    };
+  });
+
+  const validSectionCodes = new Set(DIAGNOSTIC_SECTIONS.map(section => section.code));
+  const sections = (Array.isArray(receivedSections) ? receivedSections : [])
+    .filter(section => validSectionCodes.has(section.sectionCode))
+    .map(section => ({
+      sectionCode: section.sectionCode,
+      answersResponsible: String(section.answersResponsible || '').trim().slice(0, 255),
+      sectorResponsible: String(section.sectorResponsible || '').trim().slice(0, 255)
+    }));
+
+  return await saveDiagnosticReview({ publicId, answers, sections });
 }
