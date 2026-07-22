@@ -1,13 +1,13 @@
 import Link from 'next/link';
-import DiagnosticForm from './DiagnosticForm.js';
-import DiagnosticTypeLinks from './DiagnosticTypeLinks.js';
+import DiagnosticTypeLinks from '../DiagnosticTypeLinks.js';
+import OperationsDiagnosticForm from './OperationsDiagnosticForm.js';
 
 export const metadata = {
-  title: 'Diagnóstico | Nexus',
-  description: 'Formulário público de diagnóstico Nexus'
+  title: 'Diagnóstico de Operações | Nexus',
+  description: 'Formulário público do diagnóstico de operações ISP4'
 };
 
-export default function PublicDiagnosticFormPage() {
+export default function PublicOperationsDiagnosticPage() {
   return (
     <main className="public-form-page">
       <div className="public-form-shell">
@@ -18,25 +18,19 @@ export default function PublicDiagnosticFormPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
               </svg>
             </span>
-            <span>
-              <strong>Nexus</strong>
-              <small>Diagnósticos</small>
-            </span>
+            <span><strong>Nexus</strong><small>Diagnósticos</small></span>
           </Link>
           <span className="public-form-access-badge">Acesso público</span>
         </header>
 
         <section className="public-form-intro">
-          <span className="public-form-kicker">Formulário de diagnóstico</span>
-          <h1>Questionário inicial</h1>
-          <p>
-            Responda às perspectivas Comercial, Marketing, Gestão de Pessoas e Estratégia conforme o modelo oficial de diagnóstico.
-          </p>
+          <span className="public-form-kicker">Metodologia ISP4</span>
+          <h1>Diagnóstico de operações</h1>
+          <p>Mapeie práticas, processos e oportunidades nas seis áreas operacionais do provedor.</p>
         </section>
 
-        <DiagnosticTypeLinks active="general" />
-
-        <DiagnosticForm />
+        <DiagnosticTypeLinks active="operations" />
+        <OperationsDiagnosticForm />
 
         <footer className="public-form-footer">
           <span>Seus dados serão tratados com confidencialidade.</span>

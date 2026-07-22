@@ -17,7 +17,19 @@ import {
   getDiagnosticSubmission,
   saveDiagnosticReview
 } from '../functions/diagnosticQueries.js';
+import {
+  createPublicOperationsDiagnosticSubmission,
+  getOperationsDiagnosticSubmissions,
+  getOperationsDiagnosticSubmission,
+  saveOperationsDiagnosticReview
+} from '../functions/operationsDiagnosticQueries.js';
 import { ALL_DIAGNOSTIC_QUESTIONS, DIAGNOSTIC_SECTIONS, EVALUATION_OPTIONS } from '../lib/diagnosticCatalog.js';
+import {
+  ALL_OPERATIONS_DIAGNOSTIC_QUESTIONS,
+  OPERATIONS_DIAGNOSTIC_SECTIONS,
+  OPERATIONS_EVALUATION_OPTIONS,
+  OPERATIONS_NOTE_MAX_LENGTH
+} from '../lib/operationsDiagnosticCatalog.js';
 import {
   createSession,
   deleteSession,
@@ -318,4 +330,221 @@ export async function saveDiagnosticReviewAction(publicId, receivedAnswers, rece
     }));
 
   return await saveDiagnosticReview({ publicId, answers, sections });
+}
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function isValidUuid(value) {
+  return typeof value === 'string' && UUID_PATTERN.test(value);
+}
+
+function normalizeLimitedText(value, { fieldName, maxLength, required = false, trim = true }) {
+  if (value != null && typeof value !== 'string') {
+    throw new Error(`${fieldName} deve ser um texto.`);
+  }
+
+  const source = value || '';
+  if (source.length > maxLength) {
+    throw new Error(`${fieldName} deve ter no máximo ${maxLength} caracteres.`);
+  }
+
+  const normalized = trim ? source.trim() : source;
+  if (required && !normalized) {
+    throw new Error(`Informe ${fieldName.toLowerCase()}.`);
+  }
+  return normalized;
+}
+
+function normalizeOptionalIsoDate(value, questionCode) {
+  if (value == null || value === '') return null;
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    throw new Error(`A data de implementação do item ${questionCode} deve estar no formato YYYY-MM-DD.`);
+  }
+
+  const [year, month, day] = value.split('-').map(Number);
+  const parsed = new Date(`${value}T00:00:00.000Z`);
+  if (
+    year < 1 ||
+    Number.isNaN(parsed.getTime()) ||
+    parsed.getUTCFullYear() !== year ||
+    parsed.getUTCMonth() + 1 !== month ||
+    parsed.getUTCDate() !== day
+  ) {
+    throw new Error(`A data de implementação do item ${questionCode} é inválida.`);
+  }
+  return value;
+}
+
+function normalizeOperationsDiagnosticDate(value) {
+  if (value == null || value === '') return new Date().toISOString().slice(0, 10);
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    throw new Error('A data do diagnóstico deve estar no formato YYYY-MM-DD.');
+  }
+
+  const [year, month, day] = value.split('-').map(Number);
+  const parsed = new Date(`${value}T00:00:00.000Z`);
+  if (
+    year < 1 ||
+    Number.isNaN(parsed.getTime()) ||
+    parsed.getUTCFullYear() !== year ||
+    parsed.getUTCMonth() + 1 !== month ||
+    parsed.getUTCDate() !== day
+  ) {
+    throw new Error('A data do diagnóstico é inválida.');
+  }
+  return value;
+}
+
+function normalizeOptionalImplementationDecision(value, questionCode) {
+  if (value == null || value === '') return null;
+  if (value === true || value === 'SIM') return true;
+  if (value === false || value === 'NÃO') return false;
+  throw new Error(`A decisão de implementação do item ${questionCode} é inválida.`);
+}
+
+function normalizeOperationsAnswers(receivedAnswers, operationLabel) {
+  const questionByCode = new Map(
+    ALL_OPERATIONS_DIAGNOSTIC_QUESTIONS.map(question => [question.code, question])
+  );
+  const validQuestionCodes = new Set(questionByCode.keys());
+  const validEvaluationCodes = new Set(
+    OPERATIONS_EVALUATION_OPTIONS.map(option => option.code)
+  );
+  const sourceAnswers = Array.isArray(receivedAnswers) ? receivedAnswers : [];
+
+  if (sourceAnswers.length !== validQuestionCodes.size) {
+    throw new Error(
+      `${operationLabel} deve conter todas as ${validQuestionCodes.size} perguntas do diagnóstico operacional.`
+    );
+  }
+
+  const answerCodes = new Set();
+  const answers = sourceAnswers.map(answer => {
+    if (!answer || typeof answer !== 'object' || Array.isArray(answer)) {
+      throw new Error('Foi recebida uma resposta operacional inválida.');
+    }
+
+    const questionCode = String(answer.questionCode || '');
+    const evaluationCode = String(answer.evaluationCode || '');
+    if (
+      !validQuestionCodes.has(questionCode) ||
+      answerCodes.has(questionCode) ||
+      !validEvaluationCodes.has(evaluationCode)
+    ) {
+      throw new Error('Foi recebida uma pergunta operacional inválida, duplicada ou sem avaliação válida.');
+    }
+    answerCodes.add(questionCode);
+    const implementationMode = questionByCode.get(questionCode).implementationMode;
+
+    return {
+      questionCode,
+      evaluationCode,
+      implementationDate: implementationMode === 'date'
+        ? normalizeOptionalIsoDate(answer.implementationDate, questionCode)
+        : null,
+      willImplement: implementationMode === 'boolean'
+        ? normalizeOptionalImplementationDecision(answer.willImplement, questionCode)
+        : null,
+      notes: normalizeLimitedText(answer.notes, {
+        fieldName: `As anotações do item ${questionCode}`,
+        maxLength: OPERATIONS_NOTE_MAX_LENGTH,
+        trim: false
+      })
+    };
+  });
+
+  if (answerCodes.size !== validQuestionCodes.size) {
+    throw new Error('Os códigos das perguntas do diagnóstico operacional estão incompletos.');
+  }
+  return answers;
+}
+
+function normalizeOperationsSections(receivedSections) {
+  const validSectionCodes = new Set(
+    OPERATIONS_DIAGNOSTIC_SECTIONS.map(section => section.code)
+  );
+  const sourceSections = Array.isArray(receivedSections) ? receivedSections : [];
+
+  if (sourceSections.length !== validSectionCodes.size) {
+    throw new Error(
+      `O diagnóstico operacional deve conter todas as ${validSectionCodes.size} áreas.`
+    );
+  }
+
+  const sectionCodes = new Set();
+  const sections = sourceSections.map(section => {
+    if (!section || typeof section !== 'object' || Array.isArray(section)) {
+      throw new Error('Foi recebida uma área operacional inválida.');
+    }
+
+    const sectionCode = String(section.sectionCode || '');
+    if (!validSectionCodes.has(sectionCode) || sectionCodes.has(sectionCode)) {
+      throw new Error('Foi recebida uma área operacional inválida ou duplicada.');
+    }
+    sectionCodes.add(sectionCode);
+
+    return {
+      sectionCode,
+      answersResponsible: normalizeLimitedText(section.answersResponsible, {
+        fieldName: `O responsável pelas respostas da área ${sectionCode}`,
+        maxLength: 255
+      }),
+      sectorResponsible: normalizeLimitedText(section.sectorResponsible, {
+        fieldName: `O responsável pelo setor da área ${sectionCode}`,
+        maxLength: 255
+      })
+    };
+  });
+
+  if (sectionCodes.size !== validSectionCodes.size) {
+    throw new Error('Os códigos das áreas do diagnóstico operacional estão incompletos.');
+  }
+  return sections;
+}
+
+export async function submitOperationsDiagnosticAction(payload) {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    throw new Error('Dados do diagnóstico operacional não informados.');
+  }
+
+  const companyName = normalizeLimitedText(payload.companyName, {
+    fieldName: 'O nome da empresa',
+    maxLength: 255,
+    required: true
+  });
+  const answers = normalizeOperationsAnswers(payload.answers, 'O diagnóstico operacional');
+  const sections = normalizeOperationsSections(payload.sections);
+  const diagnosticDate = normalizeOperationsDiagnosticDate(payload.diagnosticDate);
+  const publicId = crypto.randomUUID();
+
+  await createPublicOperationsDiagnosticSubmission({
+    publicId,
+    companyName,
+    diagnosticDate,
+    sections,
+    answers
+  });
+  return { publicId };
+}
+
+export async function fetchOperationsDiagnosticSubmissionsAction() {
+  await requireAdmin();
+  return await getOperationsDiagnosticSubmissions();
+}
+
+export async function fetchOperationsDiagnosticSubmissionAction(publicId) {
+  await requireAdmin();
+  if (!isValidUuid(publicId)) return null;
+  return await getOperationsDiagnosticSubmission(publicId);
+}
+
+export async function saveOperationsDiagnosticReviewAction(publicId, receivedAnswers, receivedSections) {
+  await requireAdmin();
+  if (!isValidUuid(publicId)) {
+    throw new Error('Diagnóstico operacional inválido.');
+  }
+
+  const answers = normalizeOperationsAnswers(receivedAnswers, 'A avaliação operacional');
+  const sections = normalizeOperationsSections(receivedSections);
+  return await saveOperationsDiagnosticReview({ publicId, answers, sections });
 }
