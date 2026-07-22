@@ -1,8 +1,8 @@
 import Link from 'next/link';
 
 const diagnosticTypes = [
-  { href: '/adm/diagnostics', label: 'Diagnóstico geral', code: 'general' },
-  { href: '/adm/diagnostics/operacoes', label: 'Diagnóstico de operações', code: 'operations' }
+  { href: '/adm/diagnostics', label: 'Diagnóstico estratégico', code: 'general' },
+  { href: '/adm/diagnostics/operacoes', label: 'Diagnóstico por área', code: 'operations' }
 ];
 
 export default function DiagnosticTypeTabs({ active }) {

@@ -124,7 +124,7 @@ export default function OperationsDiagnosticReview() {
         setAnswers(normalizeAnswers(data));
         setSectionData(normalizeSections(data));
       })
-      .catch(() => setLoadError('Não foi possível carregar o diagnóstico de operações.'))
+      .catch(() => setLoadError('Não foi possível carregar o diagnóstico por área.'))
       .finally(() => setLoading(false));
   }, [publicId]);
 
@@ -190,8 +190,8 @@ export default function OperationsDiagnosticReview() {
     <main className="admin-container diagnostic-review-page no-scrollbar">
       <header className="diagnostic-review-header">
         <div>
-          <Link href="/adm/diagnostics/operacoes">← Diagnósticos de operações</Link>
-          <span className="diagnostics-kicker">Diagnóstico de operações</span>
+          <Link href="/adm/diagnostics/operacoes">← Diagnósticos por área</Link>
+          <span className="diagnostics-kicker">Diagnóstico por área</span>
           <h2>{diagnostic.company_name}</h2>
           <p>{formatDate(diagnostic.diagnostic_date)} · Modelo v1 · Fórmula {diagnostic.formula_code}</p>
         </div>
@@ -200,7 +200,7 @@ export default function OperationsDiagnosticReview() {
 
       {saveMessage && <p className="diagnostic-review-message" role="status">{saveMessage}</p>}
 
-      <nav className="diagnostic-review-tabs" aria-label="Visualizações do diagnóstico de operações">
+      <nav className="diagnostic-review-tabs" aria-label="Visualizações do diagnóstico por área">
         <button className={activeView === 'questionnaire' ? 'active' : ''} onClick={() => setActiveView('questionnaire')}>Diagnóstico</button>
         <button className={activeView === 'consolidated' ? 'active' : ''} onClick={() => setActiveView('consolidated')}>Resultados</button>
         <button className={activeView === 'areas' ? 'active' : ''} onClick={() => setActiveView('areas')}>Áreas</button>

@@ -30,7 +30,7 @@ export default function OperationsDiagnosticsDashboard() {
   useEffect(() => {
     fetchOperationsDiagnosticSubmissionsAction()
       .then(setDiagnostics)
-      .catch(() => setLoadError('Não foi possível carregar os diagnósticos de operações.'))
+      .catch(() => setLoadError('Não foi possível carregar os diagnósticos por área.'))
       .finally(() => setLoading(false));
   }, []);
 
@@ -46,7 +46,7 @@ export default function OperationsDiagnosticsDashboard() {
           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h10M7 3v6m6 0v6m6-6v6" /></svg>
         </span>
         <div>
-          <span className="diagnostics-kicker">Diagnóstico de operações</span>
+          <span className="diagnostics-kicker">Diagnóstico por área</span>
           <h2>Avaliações operacionais</h2>
           <p>Comercial, Churn, Marketing, Customer Success, Atendimento e RH/Cultura em uma visão única.</p>
         </div>
@@ -65,7 +65,7 @@ export default function OperationsDiagnosticsDashboard() {
 
       <section className="admin-card diagnostics-list-card">
         <div className="diagnostics-list-heading">
-          <div><span className="diagnostics-kicker">Submissões</span><h2>Diagnósticos de operações recebidos</h2></div>
+          <div><span className="diagnostics-kicker">Submissões</span><h2>Diagnósticos por área recebidos</h2></div>
           <span>Modelo v1 · 6 áreas</span>
         </div>
 
@@ -79,7 +79,7 @@ export default function OperationsDiagnosticsDashboard() {
         ) : diagnostics.length === 0 ? (
           <div className="diagnostics-setup-state">
             <span className="empty-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 012-2h2a2 2 0 012 2" /></svg></span>
-            <h3>Nenhum diagnóstico de operações recebido</h3>
+            <h3>Nenhum diagnóstico por área recebido</h3>
             <p>As respostas enviadas pelo formulário público aparecerão aqui.</p>
           </div>
         ) : (

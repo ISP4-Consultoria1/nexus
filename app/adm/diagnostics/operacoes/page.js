@@ -1,7 +1,7 @@
 import OperationsDiagnosticsDashboard from './OperationsDiagnosticsDashboard.js';
 
 export const metadata = {
-  title: 'Diagnóstico de Operações | Nexus Admin'
+  title: 'Diagnóstico por Área | Nexus Admin'
 };
 
 export default function OperationsDiagnosticsPage() {

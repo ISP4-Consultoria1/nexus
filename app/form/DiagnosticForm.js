@@ -113,7 +113,7 @@ export default function DiagnosticForm() {
         <span className="diagnostic-success-icon">
           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
         </span>
-        <span className="diagnostic-sheet-kicker">Diagnóstico empresarial</span>
+        <span className="diagnostic-sheet-kicker">Diagnóstico estratégico</span>
         <h1>Respostas enviadas com sucesso</h1>
         <p>O diagnóstico de <strong>{companyName}</strong> foi recebido e seguirá para avaliação do consultor CFE.</p>
         <small>Protocolo: {submittedId}</small>
@@ -156,14 +156,14 @@ export default function DiagnosticForm() {
               <img src="/isp4-logo.svg" alt="ISP4 Consultoria" />
               <span className="diagnostic-sheet-brand-copy">
                 <small>Metodologia ISP4</small>
-                <strong>Diagnóstico empresarial</strong>
+                <strong>Diagnóstico estratégico</strong>
               </span>
             </span>
             <span className="diagnostic-sheet-meta">Etapa inicial</span>
           </div>
           <div className="diagnostic-sheet-heading">
             <span className="diagnostic-sheet-kicker">Questionário inicial</span>
-            <h1>Diagnóstico Empresarial</h1>
+            <h1>Diagnóstico Estratégico</h1>
             <p>Preencha a identificação abaixo para iniciar a autoavaliação.</p>
           </div>
           <div className="diagnostic-identification-grid">

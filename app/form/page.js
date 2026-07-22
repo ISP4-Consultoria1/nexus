@@ -3,8 +3,8 @@ import DiagnosticForm from './DiagnosticForm.js';
 import DiagnosticTypeLinks from './DiagnosticTypeLinks.js';
 
 export const metadata = {
-  title: 'Diagnóstico | Nexus',
-  description: 'Formulário público de diagnóstico Nexus'
+  title: 'Diagnóstico Estratégico | Nexus',
+  description: 'Formulário público do diagnóstico estratégico Nexus'
 };
 
 export default function PublicDiagnosticFormPage() {

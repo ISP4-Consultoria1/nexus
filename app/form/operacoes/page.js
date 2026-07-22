@@ -3,8 +3,8 @@ import DiagnosticTypeLinks from '../DiagnosticTypeLinks.js';
 import OperationsDiagnosticForm from './OperationsDiagnosticForm.js';
 
 export const metadata = {
-  title: 'Diagnóstico de Operações | Nexus',
-  description: 'Formulário público do diagnóstico de operações ISP4'
+  title: 'Diagnóstico por Área | Nexus',
+  description: 'Formulário público do diagnóstico por área ISP4'
 };
 
 export default function PublicOperationsDiagnosticPage() {
@@ -25,7 +25,7 @@ export default function PublicOperationsDiagnosticPage() {
 
         <section className="public-form-intro">
           <span className="public-form-kicker">Metodologia ISP4</span>
-          <h1>Diagnóstico de operações</h1>
+          <h1>Diagnóstico por área</h1>
           <p>Mapeie práticas, processos e oportunidades nas seis áreas operacionais do provedor.</p>
         </section>
 

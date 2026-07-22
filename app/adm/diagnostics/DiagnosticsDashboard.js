@@ -44,7 +44,7 @@ export default function DiagnosticsDashboard() {
           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 13h3l2-7 4 14 2-7h5M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" /></svg>
         </span>
         <div>
-          <span className="diagnostics-kicker">Diagnóstico geral</span>
+          <span className="diagnostics-kicker">Diagnóstico estratégico</span>
           <h2>Avaliações e resultados</h2>
           <p>Questionário, fórmulas, perspectivas e relatórios definidos pelo método fixo da aplicação.</p>
         </div>

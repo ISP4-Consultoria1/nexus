@@ -174,7 +174,7 @@ export default function DiagnosticReview() {
       <header className="diagnostic-review-header">
         <div>
           <Link href="/adm/diagnostics">← Diagnósticos</Link>
-          <span className="diagnostics-kicker">Diagnóstico empresarial</span>
+          <span className="diagnostics-kicker">Diagnóstico estratégico</span>
           <h2>{diagnostic.company_name}</h2>
           <p>{formatDate(diagnostic.diagnostic_date)} · Modelo v1 · Fórmula {diagnostic.formula_code}</p>
         </div>

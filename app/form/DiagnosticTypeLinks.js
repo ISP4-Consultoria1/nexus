@@ -4,10 +4,10 @@ export default function DiagnosticTypeLinks({ active }) {
   return (
     <nav className="public-diagnostic-type-tabs" aria-label="Escolha o diagnóstico">
       <Link href="/form" className={active === 'general' ? 'active' : ''} aria-current={active === 'general' ? 'page' : undefined}>
-        Geral
+        Diagnóstico estratégico
       </Link>
       <Link href="/form/operacoes" className={active === 'operations' ? 'active' : ''} aria-current={active === 'operations' ? 'page' : undefined}>
-        Operações
+        Diagnóstico por área
       </Link>
     </nav>
   );

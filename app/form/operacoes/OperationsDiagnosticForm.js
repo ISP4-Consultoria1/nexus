@@ -266,7 +266,7 @@ export default function OperationsDiagnosticForm() {
       }
       setSubmittedId(result.publicId);
     } catch {
-      setError('Não foi possível enviar o diagnóstico de operações. Tente novamente.');
+      setError('Não foi possível enviar o diagnóstico por área. Tente novamente.');
       scrollToFormProgress();
     } finally {
       setSubmitting(false);
@@ -279,7 +279,7 @@ export default function OperationsDiagnosticForm() {
         <span className="diagnostic-success-icon">
           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
         </span>
-        <span className="diagnostic-sheet-kicker">Diagnóstico de operações</span>
+        <span className="diagnostic-sheet-kicker">Diagnóstico por área</span>
         <h1>Respostas enviadas com sucesso</h1>
         <p>O diagnóstico de <strong>{companyName}</strong> foi recebido e seguirá para análise da ISP4.</p>
         <small>Protocolo: {submittedId}</small>
@@ -327,13 +327,13 @@ export default function OperationsDiagnosticForm() {
           <div className="diagnostic-sheet-titlebar">
             <span className="diagnostic-sheet-brand">
               <img src="/isp4-logo.svg" alt="ISP4 Consultoria" />
-              <span className="diagnostic-sheet-brand-copy"><small>Metodologia ISP4</small><strong>Diagnóstico de operações</strong></span>
+              <span className="diagnostic-sheet-brand-copy"><small>Metodologia ISP4</small><strong>Diagnóstico por área</strong></span>
             </span>
             <span className="diagnostic-sheet-meta">Etapa inicial</span>
           </div>
           <div className="diagnostic-sheet-heading">
             <span className="diagnostic-sheet-kicker">Visão operacional completa</span>
-            <h1>Diagnóstico de Operações</h1>
+            <h1>Diagnóstico por Área</h1>
             <p>Preencha a identificação para avaliar Comercial, Churn, Marketing, CS, Atendimento e RH.</p>
           </div>
           <div className="diagnostic-identification-grid">
@@ -350,7 +350,7 @@ export default function OperationsDiagnosticForm() {
           <div className="diagnostic-sheet-titlebar">
             <span className="diagnostic-sheet-brand">
               <img src="/isp4-logo.svg" alt="ISP4 Consultoria" />
-              <span className="diagnostic-sheet-brand-copy"><small>Diagnóstico de operações</small><strong>{activeSection.name}</strong></span>
+              <span className="diagnostic-sheet-brand-copy"><small>Diagnóstico por área</small><strong>{activeSection.name}</strong></span>
             </span>
             <span className="diagnostic-sheet-meta">{activeGroupIndex + 1} de {activeSection.groups.length} grupos</span>
           </div>
