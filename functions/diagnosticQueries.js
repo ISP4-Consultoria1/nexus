@@ -32,7 +32,6 @@ function buildResultQueries(publicId, answers) {
       now()
     FROM diagnostic_submission submission
     WHERE submission.public_id = ${publicId}
-      AND COALESCE(submission.metadata->>'diagnosticType', 'general') = 'general'
     ON CONFLICT (submission_id, section_code)
     DO UPDATE SET
       self_score_sum = EXCLUDED.self_score_sum,
@@ -63,7 +62,6 @@ function buildResultQueries(publicId, answers) {
       now()
     FROM diagnostic_submission submission
     WHERE submission.public_id = ${publicId}
-      AND COALESCE(submission.metadata->>'diagnosticType', 'general') = 'general'
     ON CONFLICT (submission_id)
     DO UPDATE SET
       overall_score_ratio = EXCLUDED.overall_score_ratio,
@@ -177,7 +175,6 @@ export async function getDiagnosticSubmissions() {
     FROM diagnostic_submission submission
     LEFT JOIN diagnostic_answer answer ON answer.submission_id = submission.id
     LEFT JOIN diagnostic_submission_result result ON result.submission_id = submission.id
-    WHERE COALESCE(submission.metadata->>'diagnosticType', 'general') = 'general'
     GROUP BY submission.id, result.submission_id
     ORDER BY submission.created_at DESC
   `;
@@ -198,7 +195,6 @@ export async function getDiagnosticSubmission(publicId) {
     FROM diagnostic_submission submission
     LEFT JOIN diagnostic_submission_result result ON result.submission_id = submission.id
     WHERE submission.public_id = ${publicId}
-      AND COALESCE(submission.metadata->>'diagnosticType', 'general') = 'general'
     LIMIT 1
   `;
 
@@ -270,7 +266,6 @@ export async function saveDiagnosticReview({ publicId, answers, sections }) {
     FROM diagnostic_submission submission
     WHERE target.submission_id = submission.id
       AND submission.public_id = ${publicId}
-      AND COALESCE(submission.metadata->>'diagnosticType', 'general') = 'general'
       AND target.question_code = ${answer.questionCode}
   `);
 
@@ -289,7 +284,6 @@ export async function saveDiagnosticReview({ publicId, answers, sections }) {
         ${section.sectorResponsible || null}
       FROM diagnostic_submission submission
       WHERE submission.public_id = ${publicId}
-        AND COALESCE(submission.metadata->>'diagnosticType', 'general') = 'general'
       ON CONFLICT (submission_id, section_code)
       DO UPDATE SET
         answers_responsible_name = EXCLUDED.answers_responsible_name,
@@ -302,7 +296,6 @@ export async function saveDiagnosticReview({ publicId, answers, sections }) {
     UPDATE diagnostic_submission
     SET status = 'under_review', reviewed_at = now(), updated_at = now()
     WHERE public_id = ${publicId}
-      AND COALESCE(metadata->>'diagnosticType', 'general') = 'general'
   `);
   queries.push(...buildResultQueries(publicId, answers));
 
